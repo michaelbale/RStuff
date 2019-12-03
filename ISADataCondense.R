@@ -49,11 +49,11 @@ isadata.condense.singlerun<- function(ISA.df)
   ISA.df<-data.frame(lapply(ISA.df, as.character), stringsAsFactors = FALSE) #Make data of type 'chr'
   #Create "raw" frequency table using identical rows in supplied data.frame() with column names given by colnames(data.frame())
   #Note, the same IS at the 3LTR and 5LTR will be counted separately
-  tmp.counts.raw<-count(ISA.df, colnames(ISA.df))  
+  tmp.counts.raw<-plyr::count(ISA.df, colnames(ISA.df))  
   tmp.counts.raw<-tmp.counts.raw[order(-tmp.counts.raw$freq),] #Order by descending number of counts
   #create "binary" data.frame() by removing the "LTR" (and "freq") column(s) from the raw frequency table
   tmp.LTRbinary<-tmp.counts.raw[,!names(tmp.counts.raw) %in% c("LTR","freq")]
-  tmp.LTRbinary.counts<-count(tmp.LTRbinary,colnames(tmp.LTRbinary)) #determine which IS's are detected at both ends
+  tmp.LTRbinary.counts<-plyr::count(tmp.LTRbinary,colnames(tmp.LTRbinary)) #determine which IS's are detected at both ends
   tmp.has2LTRdetect<-tmp.LTRbinary.counts[which(tmp.LTRbinary.counts$freq==2),] #Move those to new data.frame()
   
   #For each IS detected at the 5 and 3 LTR, find counterparts in raw count dataframe
@@ -112,7 +112,7 @@ isadata.condense.multirun<-function(ISA.df)
   #Create Final dataframe to return
   ISA.Master.df<-data.frame(matrix(ncol=length(colname.vec)))
   ISA.Master.df<-setNames(ISA.Master.df,colname.vec)
-
+  
   #Make Indicator list for number of runs IS is detected
   tmp.list<-list()
   for(name in names(ISA.List.SRCond))
@@ -120,7 +120,7 @@ isadata.condense.multirun<-function(ISA.df)
     tmp.list[[name]]<-ISA.List.SRCond[[name]][,-length(ISA.List.SRCond[[name]])]
   }
   tmp.df<-do.call("rbind",tmp.list)
-  tmp.df.counts<-count(tmp.df,colnames(tmp.df))
+  tmp.df.counts<-plyr::count(tmp.df,colnames(tmp.df))
   tmp.df.counts<-tmp.df.counts[order(-tmp.df.counts$freq),]
   ###
   
@@ -155,7 +155,7 @@ isadata.condense.multirun<-function(ISA.df)
   #Sum "freq" columns for "TotalFreq" column
   ISA.Master.df$TotalFreq<-apply(ISA.Master.df[,(length(colnames(ISA.List.raw[[1]][,!names(ISA.List.raw[[1]]) %in% "LTR"]))+1):(length(ISA.Master.df)-1)],1,sum)
   
-
+  
   #Return dataframe ordered on descending "TotalFreq" 
   return(ISA.Master.df[order(-ISA.Master.df$TotalFreq),])
 }
